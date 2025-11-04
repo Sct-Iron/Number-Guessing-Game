@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Num Guess — Number Guessing Game</title>
+    <style>
+        /* ====== Base Reset ====== */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+        html,body { height:100%; }
+
+        body {
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background: linear-gradient(135deg,#071425 0%, #0f2027 40%, #203a43 100%);
+            color:#e6f7f2;
+            padding:2rem;
+        }
+        
+        /*Start Screen*/
+        #startScreen {
+            position:fixed; inset:0;
+            display:flex; 
+            flex-direction:column; 
+            align-items:center; 
+            justify-content:center;
+            background:linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
+            color:#aee1e1; z-index:10000;
+            animation: fadeIn1 .6s ease;
+        }
+       @keyframes fadeIn1 { 
+            from{opacity:0; transform: translateY(8px)} 
+            to{opacity:1; transform:none} 
+       }
+        #startBtn {
+            padding:0.56rem 0.85rem;
+             border-radius:10px; 
+             border:none; 
+             cursor:pointer;
+            font-weight:700; 
+            color:#072022; 
+            background:linear-gradient(135deg,#00c9a7,#6df0b0);
+            transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+            margin: 15px;
+        }
+        #startBtn:active{ transform:translateY(1px); }
+
+
+        /* Loading Screen */
+        #loadingScreen {
+            position:fixed; inset:0;
+            display:flex; 
+            flex-direction:column; 
+            align-items:center; 
+            justify-content:center;
+            background:linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
+            color:#aee1e1; z-index:9999;
+            transition: opacity .6s ease, visibility .6s ease;
+        }
+        .loader {
+            width:56px;
+            height:56px; 
+            border-radius:50%;
+            border:6px solid rgba(255,255,255,0.08);
+            border-top-color:#00c9a7; 
+            animation:spin 1s linear infinite;
+            margin-bottom:14px;
+        }
+        #loadingScreen p { 
+            font-size:1.05rem; 
+            letter-spacing:0.2px;
+            font-weight:500;
+        }
+        @keyframes spin{ to{ transform:rotate(360deg); } }
+
+        /* Game Card */
+        .game-container {
+            width:100%; max-width:420px;
+            background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            border:1px solid rgba(255,255,255,0.06);
+            border-radius:16px; padding:1.6rem;
+            box-shadow:0 10px 30px rgba(2,6,23,0.6);
+            backdrop-filter: blur(8px);
+            text-align:center;
+            animation:fadeIn .6s ease, float 2s ease-in-out infinite;
+        }
+        @keyframes fadeIn { 
+            from{opacity:0; transform: translateY(8px)} 
+            to{opacity:1; transform:none} 
+        }
+        @keyframes float {
+            0%, 100% {transform: translateY(0px)}
+            50% {transform: translateY(-12px)}
+        }
+        
+        h1 { 
+            font-size:1.45rem;
+            margin-bottom:6px; 
+            color:#bff4e8; 
+            }
+        p.lead { color:#cde8e2; margin-bottom:1rem; font-size:0.95rem; }
+
+        .range { 
+            font-weight:600; 
+            color:#e6fff8; 
+        }
+
+        .input-group { 
+            display:flex; 
+            gap:10px;
+            justify-content:center; 
+            margin-top:1rem; 
+        }
+
+        input[type="text"] {
+            width:140px;
+            padding:0.6rem 0.9rem; 
+            border-radius:10px; 
+            border:none; 
+            outline:none;
+            background: rgba(255,255,255,0.04); 
+            color:#eafff6; 
+            text-align:center; 
+            font-size:1rem;
+            transition: box-shadow .18s ease, transform .12s ease;
+        }
+        input[type="text"]:focus{
+             box-shadow:0 0 8px rgba(0,201,167,0.18); 
+             transform:translateY(-1px); 
+             background:rgba(255,255,255,0.06); 
+            }
+
+        button {
+            padding:0.56rem 0.85rem;
+             border-radius:10px; 
+             border:none; 
+             cursor:pointer;
+            font-weight:700; color:#072022; background:linear-gradient(135deg,#00c9a7,#6df0b0);
+            transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+        }
+        button:active{ transform:translateY(1px); }
+
+        button.secondary{
+            background:linear-gradient(180deg,#24303b,#2e3b46);
+            color:#cfeee8; 
+            font-weight:700;
+        }
+        button[disabled] { 
+            opacity:0.6;
+            cursor:not-allowed; 
+            transform:none; 
+            box-shadow:none; 
+        }
+
+        .feedback {
+            font-size:1.04rem; 
+            margin-top:1.1rem; 
+            min-height:1.6rem;
+            color:#d7f7ef; 
+            transition: color .16s ease, transform .16s ease;
+        }
+        .feedback.warn { color:#ffd37a; }
+        .feedback.bad { color:#ff9a9a; }
+        .feedback.good { color:#9ef3c6; transform:scale(1.02); }
+
+        .attempts { margin-top:0.65rem; color:#92a6b1; font-size:0.9rem; }
+
+        .meta { display:flex; justify-content:space-between; gap:10px; margin-top:10px; align-items:center; }
+        .meta .score { color:#bfeee0; font-weight:600; font-size:0.95rem; }
+
+        /*Glow Effect*/
+        .game-container.win {
+            box-shadow: 0 0 25px rgba(0,255,150,0.5);
+            transition: 1s box-shadow ease-in-out;
+    }
+        .game-container.lose {
+    box-shadow: 0 0 25px rgba(255,100,100,0.4);
+    transition: 1s box-shadow ease-in-out;
+    }
+
+        /* small helper */
+        .sr-only{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+
+        /* Responsiveness */
+        @media (max-width:420px){ .input-group{ flex-direction:column; gap:8px; } input[type="text"]{ width:100% } }
+
+    </style>
+</head>
+<body>
+    <div id="startScreen">
+        <h1>Welcome to Num Guess!</h1>
+        <button id="startBtn">Start Game</button>
+    </div>
+    <div id="loadingScreen" role="status" aria-live="polite">
+        <div class="loader" aria-hidden="true"></div>
+        <p>Loading Num Guess...</p>
+    </div>
+    <audio id="bgMusic" src="Sounds/mystical-music-54294.mp3"></audio>
+    <audio id="wrong" src="Sounds/classic-game-action-negative-18-224576.mp3"></audio>
+    <audio id="lose" src="Sounds/game-over-417465.mp3"></audio>
+    <audio id="win" src="Sounds/level-up-08-402152.mp3"></audio>
+
+    <main class="game-container" aria-labelledby="gameTitle" style="display:none;">
+        <h1 id="gameTitle">🔢 Num Guess</h1>
+        <p class="lead">Guess the number between <span class="range">1</span> and <span class="range">100</span>. Try to beat your best!</p>
+
+        <div class="input-group">
+            <label for="guessInput" class="sr-only">Enter your guess</label>
+            <input id="guessInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Enter guess" aria-describedby="hint"/>
+            <button id="guessBtn">Guess</button>
+        </div>
+
+        <div id="hint" class="feedback" aria-live="polite"></div>
+        <div class="attempts" id="attempts">Attempts: 0</div>
+
+        <div class="meta">
+            <div class="score" id="bestScore">Best: —</div>
+            <div>
+                <button id="resetBtn" class="secondary">Reset Game</button>
+            </div>
+        </div>
+        
+    </main>
+
+    <script>
+     // --- Game Startup Sequence ---
+const startBtn = document.getElementById('startBtn');
+const startScreen = document.getElementById('startScreen');
+const loading = document.getElementById('loadingScreen');
+const game = document.querySelector('.game-container');
+const bgMusic = document.getElementById('bgMusic');
+const wrongAttempt = document.getElementById('wrong');
+const loseSound = document.getElementById('lose');
+const winSound = document.getElementById('win');
+
+
+startBtn.addEventListener('click', () => {
+    startScreen.style.display = 'none';
+    loading.style.display = 'flex';
+    bgMusic.volume = 0.2;
+    bgMusic.loop = true;
+    bgMusic.play().catch(err => console.log('Autoplay blocked until interaction:', err));
+
+    setTimeout(() => {
+        loading.style.opacity = '0';
+        loading.style.visibility = 'hidden';
+        game.style.display = 'block';
+        document.getElementById('guessInput').focus();
+    }, 1500);
+});
+
+
+        // Game logic
+        (function() {
+            const max = 100, min = 1;
+            let secret = rand(min, max);
+            let attempts = 0;
+            const input = document.getElementById('guessInput');
+            const guessBtn = document.getElementById('guessBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const feedback = document.getElementById('hint');
+            const attemptsEl = document.getElementById('attempts');
+            const bestEl = document.getElementById('bestScore');
+
+            const STORAGE_KEY = 'numguess_best';
+            let best = Number(localStorage.getItem(STORAGE_KEY)) || null;
+            updateBestDisplay();
+
+            function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+            function updateAttempts(){
+                attemptsEl.textContent = 'Attempts: ' + attempts;
+            }
+
+            function updateBestDisplay(){
+                bestEl.textContent = best ? `Best: ${best}` : 'Best: —';
+            }
+
+            function sanitizeVal(v){
+                // allow leading/trailing spaces, disallow +/-, decimals
+                if (!v) return NaN;
+                v = v.trim();
+                // only digits
+                if (!/^\d+$/.test(v)) return NaN;
+                return Number(v);
+            }
+
+            function setFeedback(msg, type){
+                feedback.textContent = msg;
+                feedback.className = 'feedback' + (type ? ' ' + type : '');
+            }
+
+            function handleGuess(){
+                const raw = input.value;
+                const val = sanitizeVal(raw);
+
+                if (isNaN(val)){
+                    setFeedback('Please enter a whole number between ' + MIN + ' and ' + MAX + '.', 'warn');
+                    return;
+                }
+                if (val < min || val > max){
+                    setFeedback(`Number must be between ${min} and ${max}.`, 'warn');
+                    return;
+                }
+                
+                attempts++;
+                updateAttempts();
+                if (attempts === 3 && val !== secret) {
+                    input.disabled = true;  
+                    guessBtn.disabled = true;
+                    setFeedback(`😥 Game Over, You Lose. Correct Number was ${secret}.`, 'bad');
+                    document.querySelector(".game-container").classList.add('lose')
+                    feedback.animate([{ transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }], { duration:200, easing:'ease-out' });
+                    loseSound.currentTime = 0;
+                    loseSound.play();
+                    bgMusic.pause();
+                    return;
+                    }
+                    
+                if (val === secret){
+                    setFeedback(`🎉 Correct! The number was ${secret}.`, 'good');
+                    document.querySelector(".game-container").classList.add('win')
+                    winSound.currentTime = 0;
+                        winSound.play();
+                        winSound.volume = 0.3;
+                        bgMusic.pause();
+                    if (!best || attempts < best){
+                        best = attempts;
+                        localStorage.setItem(STORAGE_KEY, String(best));
+                        updateBestDisplay();
+                        setFeedback(`🎉 Correct! The number was ${secret}. New best: ${best} attempts!`, 'good');
+                        winSound.currentTime = 0;
+                        winSound.play();
+                        bgMusic.pause();
+                    }
+                    // disable inputs
+                    input.disabled = true;
+                    guessBtn.disabled = true;
+                } else {
+                    const diff = Math.abs(val - secret);
+                    let hint = (val < secret) ? 'Try higher ⬆' : 'Try lower ↓';
+                    // add relative hint
+                    if (diff <= 5) hint = '🔥 Very close! ' + hint;
+                    else if (diff <= 10) hint = 'Warm. ' + hint;
+                    else if (diff <= 20) hint = 'Cold. ' + hint;
+                    else hint = 'Far. ' + hint;
+                    setFeedback(hint, 'bad');
+                    // small shake for bad guess
+                    feedback.animate([{ transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }], { duration:200, easing:'ease-out' });
+                    wrongAttempt.currentTime = 0;
+                    wrongAttempt.play();
+                }
+                input.value = '';
+                input.focus();
+            }
+
+            
+            guessBtn.addEventListener('click',  () => {
+                handleGuess();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                
+                    handleGuess();
+                }
+                // prevent non-digit keys except control keys
+                if (e.key.length === 1 && !/[\d]/.test(e.key)) {
+                    e.preventDefault();
+                }
+            });
+
+            resetBtn.addEventListener('click', () => {
+                secret = rand(min, max);
+                attempts = 0;
+                updateAttempts();
+                setFeedback('Game reset. Good luck!', '');
+                input.disabled = false;
+                guessBtn.disabled = false;
+                input.value = '';
+                input.focus();
+                document.querySelector('.game-container').classList.remove('win', 'lose');
+                bgMusic.play().catch(err => console.log('Autoplay blocked until interaction:', err));
+            });
+
+        })();
+    </script>
+</body>
+</html>
