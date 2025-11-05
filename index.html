@@ -154,6 +154,21 @@
             box-shadow:none; 
         }
 
+        /* Stats modal & button */
+        #statsBtn { margin-right:8px; }
+        #statsModal {
+            position: fixed; inset: 0; display: none; align-items: center; justify-content:center;
+            background: rgba(2,6,12,0.6); z-index:10002; padding: 1rem;
+        }
+        .stats-panel {
+            width:100%; max-width:360px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            border:1px solid rgba(255,255,255,0.06); padding:1.25rem; border-radius:12px; text-align:center; color:#dff7ef;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); opacity: 1;
+        }
+        .stats-panel h2 { margin:0 0 8px; color:#bff4e8 }
+        .stats-panel p { margin:6px 0; font-weight:600 }
+        #statControls { margin-top:12px; display:flex; justify-content:center; gap:10px; }
+
         .feedback {
             font-size:1.04rem; 
             margin-top:1.1rem; 
@@ -198,14 +213,13 @@
         <p>Loading Num Guess...</p>
     </div>
 
-    <--- Audio Elements -->
-
+    
     <audio id="bgMusic" src="Sounds/mystical-music-54294.mp3"></audio>
     <audio id="wrong" src="Sounds/classic-game-action-negative-18-224576.mp3"></audio>
     <audio id="lose" src="Sounds/game-over-417465.mp3"></audio>
     <audio id="win" src="Sounds/level-up-08-402152.mp3"></audio>
 
-    <-- Game Container -->
+    
     <main class="game-container" aria-labelledby="gameTitle" style="display:none;">
         <h1 id="gameTitle">🔢 Num Guess</h1>
         <p class="lead">Guess the number between <span class="range">1</span> and <span class="range">100</span>. Try to beat your best!</p>
@@ -222,11 +236,26 @@
         <div class="meta">
             <div class="score" id="bestScore">Best: —</div>
             <div>
+                <button id="statsBtn" class="secondary">Stats</button>
                 <button id="resetBtn" class="secondary">Restart Game</button>
             </div>
         </div>
         
     </main>
+
+    <!-- Stats Modal -->
+    <div id="statsModal" aria-hidden="true">
+        <div class="stats-panel" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+            <h2 id="statsTitle">Statistics</h2>
+            <p>Wins: <span id="statWins">0</span></p>
+            <p>Losses: <span id="statLosses">0</span></p>
+            <p>W/L Ratio: <span id="statsWinLose">0.00</span></p>
+            <div id="statControls">
+                <button id="clearStats" class="secondary">Clear</button>
+                <button id="closeStats" class="secondary">Close</button>
+            </div>
+        </div>
+    </div>
 
     <script>
      // --- Game Startup Sequence ---
@@ -238,6 +267,56 @@ const bgMusic = document.getElementById('bgMusic');
 const wrongAttempt = document.getElementById('wrong');
 const loseSound = document.getElementById('lose');
 const winSound = document.getElementById('win');
+
+// --- Statistics (persisted) ---
+const STATS_KEY = 'numguess_stats';
+let stats = { wins: 0, losses: 0, winLose: 0 };
+function loadStats() {
+    try {
+        const raw = localStorage.getItem(STATS_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (typeof parsed.wins === 'number' && typeof parsed.losses === 'number') stats = parsed;
+        }
+    } catch (e) { /* ignore */ }
+}
+function saveStats() { updateWinLoseRatio(); localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
+function openStats() {
+    document.getElementById('statWins').textContent = stats.wins;
+    document.getElementById('statLosses').textContent = stats.losses;
+    document.getElementById('statsWinLose').textContent = stats.winLose;
+    const modal = document.getElementById('statsModal');
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+}
+function closeStats() {
+    const modal = document.getElementById('statsModal');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+}
+//Win Lose ratio logic
+function updateWinLoseRatio() {
+    if (stats.losses === 0 && stats.wins > 0) {
+        stats.winLose = "🔥 Perfect Record";
+    } else if (stats.losses > 0) {
+        stats.winLose = (stats.wins / stats.losses).toFixed(2);
+    } else {
+        stats.winLose = 0.00;
+    }
+}
+loadStats();
+updateWinLoseRatio();
+
+// wire stats buttons (exist when script runs at end of body)
+const statsBtn = document.getElementById('statsBtn');
+if (statsBtn) statsBtn.addEventListener('click', openStats);
+const closeStatsBtn = document.getElementById('closeStats');
+if (closeStatsBtn) closeStatsBtn.addEventListener('click', closeStats);
+const clearStatsBtn = document.getElementById('clearStats');
+if (clearStatsBtn) clearStatsBtn.addEventListener('click', () => {
+    stats = { wins: 0, losses: 0, winLose: `${0.00}`}; saveStats(); openStats();
+});
+
 
 
 startBtn.addEventListener('click', () => {
@@ -312,17 +391,22 @@ startBtn.addEventListener('click', () => {
                 attempts++;
                 updateAttempts();
                 if (attempts === 3 && val !== secret) {
+                    //Game Over Logic
                     input.disabled = true;  
                     guessBtn.disabled = true;
                     setFeedback(`😥 Game Over, You Lose. Correct Number was ${secret}.`, 'bad');
                     document.querySelector(".game-container").classList.add('lose')
+                    // add shake effect
                     feedback.animate([{ transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }], { duration:200, easing:'ease-out' });
+                    //lose sound
                     loseSound.currentTime = 0;
                     loseSound.play();
                     bgMusic.pause();
+                    // record loss
+                    try { stats.losses = (stats.losses || 0) + 1; saveStats(); } catch(e) {}
                     return;
                     }
-                    
+                    // Correct Guess Logic
                 if (val === secret){
                     setFeedback(`🎉 Correct! The number was ${secret}.`, 'good');
                     document.querySelector(".game-container").classList.add('win')
@@ -330,6 +414,9 @@ startBtn.addEventListener('click', () => {
                         winSound.play();
                         winSound.volume = 0.3;
                         bgMusic.pause();
+                    // record win
+                    try { stats.wins = (stats.wins || 0) + 1; saveStats(); } catch(e) {}
+                    //Check and update best score
                     if (!best || attempts < best){
                         best = attempts;
                         localStorage.setItem(STORAGE_KEY, String(best));
