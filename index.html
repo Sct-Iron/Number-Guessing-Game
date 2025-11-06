@@ -476,10 +476,12 @@
     if (statsBtn) statsBtn.addEventListener('click', openStats);
 
     const closeStatsBtn = document.getElementById('closeStats');
-    if (closeStatsBtn) closeStatsBtn.addEventListener('click', () => {
-    stats = { wins: 0, losses: 0, winLose: `${0.00}` };
-    saveStats();
-    openStats();
+    if (closeStatsBtn) closeStatsBtn.addEventListener('click', closeStats);
+    const clearStatsBtn = document.getElementById('clearStats');
+    if (clearStatsBtn) clearStatsBtn.addEventListener('click', () => {
+      stats = { wins: 0, losses: 0, winLose: `${0.00}` };
+      saveStats();
+      openStats();
     });
 
 // ==========================
@@ -593,7 +595,7 @@ startBtn.addEventListener('click', () => {
         updatePreviousGuesses();
 
         // ❌ Game Over
-        if (attempts === 3 && val !== secret) {
+        if (attempts === 5 && val !== secret) {
             input.disabled = true;
             guessBtn.disabled = true;
             setFeedback(`😥 Game Over, You Lose. Correct number was ${secret}.`, 'bad');
