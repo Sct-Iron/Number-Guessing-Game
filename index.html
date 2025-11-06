@@ -401,7 +401,7 @@
           <li>🔥 <strong>Very close</strong> — within <strong>5</strong> numbers</li>
           <li>♨️ <strong>Warm</strong> — within <strong>10</strong> numbers</li>
           <li>❄️ <strong>Cold</strong> — within <strong>20</strong> numbers</li>
-          <li>🌌 <strong>Far</strong> — Not close at all, like more than <strong>20</strong> numbers away</li>
+          <li>🌌 <strong>Far</strong> — Not close at all, more than <strong>20</strong> numbers away</li>
         </ul>
         <p style="margin-bottom:12px;">⬆️ You’ll also be told whether to guess <strong>higher</strong> or <strong>lower</strong>.</p>
         <p>📊 Track your <strong>Stats</strong> to see wins, losses, and your W/L ratio — or hit <strong>Restart Game</strong> anytime to play again!</p>
@@ -595,7 +595,7 @@ startBtn.addEventListener('click', () => {
         updatePreviousGuesses();
 
         // ❌ Game Over
-        if (attempts === 5 && val !== secret) {
+        if (attempts === 4 && val !== secret) {
             input.disabled = true;
             guessBtn.disabled = true;
             setFeedback(`😥 Game Over, You Lose. Correct number was ${secret}.`, 'bad');
