@@ -395,7 +395,7 @@
 
       <div style="text-align:left; margin:15px 0;">
         <p style="margin-bottom:12px;">🎯 <strong>Your Goal:</strong> Guess the secret number hidden between <strong>1</strong> and <strong>100</strong>.</p>
-        <p style="margin-bottom:12px;">🧩 You have <strong>3 attempts</strong> to find the correct number — so choose wisely!</p>
+        <p style="margin-bottom:12px;">🧩 You have <strong>4 attempts</strong> to find the correct number — so choose wisely!</p>
         <p style="margin-bottom:12px;">🔍 After each guess, you’ll receive a hint:</p>
         <ul style="list-style:none; padding-left:15px; margin-bottom:12px;">
           <li>🔥 <strong>Very close</strong> — within <strong>5</strong> numbers</li>
@@ -595,7 +595,7 @@ startBtn.addEventListener('click', () => {
         updatePreviousGuesses();
 
         // ❌ Game Over
-        if (attempts === 4 && val !== secret) {
+        if (attempts ===5 && val !== secret) {
             input.disabled = true;
             guessBtn.disabled = true;
             setFeedback(`😥 Game Over, You Lose. Correct number was ${secret}.`, 'bad');
