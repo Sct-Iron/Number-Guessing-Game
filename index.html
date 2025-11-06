@@ -595,7 +595,7 @@ startBtn.addEventListener('click', () => {
         updatePreviousGuesses();
 
         // ❌ Game Over
-        if (attempts ===5 && val !== secret) {
+        if (attempts === 4 && val !== secret) {
             input.disabled = true;
             guessBtn.disabled = true;
             setFeedback(`😥 Game Over, You Lose. Correct number was ${secret}.`, 'bad');
