@@ -1,329 +1,520 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Num Guess — Number Guessing Game</title>
-    <style>
-        /* ====== Base Reset ====== */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-        html,body { height:100%; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Num Guess — Number Guessing Game</title>
 
-        body {
-            min-height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background: linear-gradient(135deg,#071425 0%, #0f2027 40%, #203a43 100%);
-            color:#e6f7f2;
-            padding:2rem;
-        }
-        
-        /*Start Screen*/
-        #startScreen {
-            position:fixed; inset:0;
-            display:flex; 
-            flex-direction:column; 
-            align-items:center; 
-            justify-content:center;
-            background:linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
-            color:#aee1e1; z-index:10000;
-            animation: fadeIn1 .6s ease;
-        }
-       @keyframes fadeIn1 { 
-            from{opacity:0; transform: translateY(8px)} 
-            to{opacity:1; transform:none} 
-       }
-        #startBtn {
-            padding:0.56rem 0.85rem;
-             border-radius:10px; 
-             border:none; 
-             cursor:pointer;
-            font-weight:700; 
-            color:#072022; 
-            background:linear-gradient(135deg,#00c9a7,#6df0b0);
-            transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
-            margin: 15px;
-        }
-        #startBtn:active{ transform:translateY(1px); }
-
-
-        /* Loading Screen */
-        #loadingScreen {
-            position:fixed; inset:0;
-            display:flex; 
-            flex-direction:column; 
-            align-items:center; 
-            justify-content:center;
-            background:linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
-            color:#aee1e1; z-index:9999;
-            transition: opacity .6s ease, visibility .6s ease;
-        }
-        .loader {
-            width:56px;
-            height:56px; 
-            border-radius:50%;
-            border:6px solid rgba(255,255,255,0.08);
-            border-top-color:#00c9a7; 
-            animation:spin 1s linear infinite;
-            margin-bottom:14px;
-        }
-        #loadingScreen p { 
-            font-size:1.05rem; 
-            letter-spacing:0.2px;
-            font-weight:500;
-        }
-        @keyframes spin{ to{ transform:rotate(360deg); } }
-
-        /* Game Card */
-        .game-container {
-            width:100%; max-width:420px;
-            background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-            border:1px solid rgba(255,255,255,0.06);
-            border-radius:16px; padding:1.6rem;
-            box-shadow:0 10px 30px rgba(2,6,23,0.6);
-            backdrop-filter: blur(8px);
-            text-align:center;
-            animation:fadeIn .6s ease, float 2s ease-in-out infinite;
-        }
-        @keyframes fadeIn { 
-            from{opacity:0; transform: translateY(8px)} 
-            to{opacity:1; transform:none} 
-        }
-        @keyframes float {
-            0%, 100% {transform: translateY(0px)}
-            50% {transform: translateY(-12px)}
-        }
-        
-        h1 { 
-            font-size:1.45rem;
-            margin-bottom:6px; 
-            color:#bff4e8; 
-            }
-        p.lead { color:#cde8e2; margin-bottom:1rem; font-size:0.95rem; }
-
-        .range { 
-            font-weight:600; 
-            color:#e6fff8; 
-        }
-
-        .input-group { 
-            display:flex; 
-            gap:10px;
-            justify-content:center; 
-            margin-top:1rem; 
-        }
-
-        input[type="text"] {
-            width:140px;
-            padding:0.6rem 0.9rem; 
-            border-radius:10px; 
-            border:none; 
-            outline:none;
-            background: rgba(255,255,255,0.04); 
-            color:#eafff6; 
-            text-align:center; 
-            font-size:1rem;
-            transition: box-shadow .18s ease, transform .12s ease;
-        }
-        input[type="text"]:focus{
-             box-shadow:0 0 8px rgba(0,201,167,0.18); 
-             transform:translateY(-1px); 
-             background:rgba(255,255,255,0.06); 
-            }
-
-        button {
-            padding:0.56rem 0.85rem;
-             border-radius:10px; 
-             border:none; 
-             cursor:pointer;
-            font-weight:700; color:#072022; background:linear-gradient(135deg,#00c9a7,#6df0b0);
-            transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
-        }
-        button:active{ transform:translateY(1px); }
-
-        button.secondary{
-            background:linear-gradient(180deg,#24303b,#2e3b46);
-            color:#cfeee8; 
-            font-weight:700;
-        }
-        button[disabled] { 
-            opacity:0.6;
-            cursor:not-allowed; 
-            transform:none; 
-            box-shadow:none; 
-        }
-
-        /* Stats modal & button */
-        #statsBtn { margin-right:8px; }
-        #statsModal {
-            position: fixed; inset: 0; display: none; align-items: center; justify-content:center;
-            background: rgba(2,6,12,0.6); z-index:10002; padding: 1rem;
-        }
-        .stats-panel {
-            width:100%; max-width:360px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-            border:1px solid rgba(255,255,255,0.06); padding:1.25rem; border-radius:12px; text-align:center; color:#dff7ef;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6); opacity: 1;
-        }
-        .stats-panel h2 { margin:0 0 8px; color:#bff4e8 }
-        .stats-panel p { margin:6px 0; font-weight:600 }
-        #statControls { margin-top:12px; display:flex; justify-content:center; gap:10px; }
-
-        .feedback {
-            font-size:1.04rem; 
-            margin-top:1.1rem; 
-            min-height:1.6rem;
-            color:#d7f7ef; 
-            transition: color .16s ease, transform .16s ease;
-        }
-        .feedback.warn { color:#ffd37a; }
-        .feedback.bad { color:#ff9a9a; }
-        .feedback.good { color:#9ef3c6; transform:scale(1.02); }
-
-        .attempts { margin-top:0.65rem; color:#92a6b1; font-size:0.9rem; }
-
-        .meta { display:flex; justify-content:space-between; gap:10px; margin-top:10px; align-items:center; }
-        
-
-        /*Glow Effect*/
-        .game-container.win {
-            box-shadow: 0 0 25px rgba(0,255,150,0.5);
-            transition: 1s box-shadow ease-in-out;
-    }
-        .game-container.lose {
-    box-shadow: 0 0 25px rgba(255,100,100,0.4);
-    transition: 1s box-shadow ease-in-out;
+  <style>
+    /* ====== Base Reset ====== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
 
-        /* small helper */
-        .sr-only{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    html, body {
+      height: 100%;
+    }
 
-        /* Responsiveness */
-        @media (max-width:420px){ .input-group{ flex-direction:column; gap:8px; } input[type="text"]{ width:100% } }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #071425 0%, #0f2027 40%, #203a43 100%);
+      color: #e6f7f2;
+      padding: 2rem;
+    }
 
-    </style>
+    /* ====== Start Screen ====== */
+    #startScreen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
+      color: #aee1e1;
+      z-index: 10000;
+      animation: fadeIn1 .6s ease;
+    }
+
+    @keyframes fadeIn1 {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    #startBtn {
+      padding: 0.56rem 0.85rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      color: #072022;
+      background: linear-gradient(135deg, #00c9a7, #6df0b0);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+      margin: 15px;
+    }
+
+    #startBtn:active {
+      transform: translateY(1px);
+    }
+
+    /* ====== Loading Screen ====== */
+    #loadingScreen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
+      color: #aee1e1;
+      z-index: 9999;
+      transition: opacity .6s ease, visibility .6s ease;
+    }
+
+    .loader {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 6px solid rgba(255,255,255,0.08);
+      border-top-color: #00c9a7;
+      animation: spin 1s linear infinite;
+      margin-bottom: 14px;
+    }
+
+    #loadingScreen p {
+      font-size: 1.05rem;
+      letter-spacing: 0.2px;
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ====== Game Card ====== */
+    .game-container {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 1.6rem;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      animation: fadeIn .6s ease, float 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      margin-bottom: 6px;
+      color: #bff4e8;
+    }
+
+    p.lead {
+      color: #cde8e2;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .range {
+      font-weight: 600;
+      color: #e6fff8;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    input[type="text"] {
+      width: 140px;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,0.04);
+      color: #eafff6;
+      text-align: center;
+      font-size: 1rem;
+      transition: box-shadow .18s ease, transform .12s ease;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 8px rgba(0,201,167,0.18);
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.06);
+    }
+
+    button {
+      padding: 0.56rem 0.85rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      color: #072022;
+      background: linear-gradient(135deg, #00c9a7, #6df0b0);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.secondary {
+      background: linear-gradient(180deg, #24303b, #2e3b46);
+      color: #cfeee8;
+      font-weight: 700;
+    }
+
+    button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ====== Stats & Help Modals ====== */
+    #statsBtn, #helpBtn {
+      margin-right: 8px;
+    }
+
+    #statsModal, #helpModal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 10, 18, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 10002;
+      padding: 1rem;
+    }
+
+    .stats-panel {
+      width: 100%;
+      max-width: 360px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      backdrop-filter: blur(10px);
+      border: none;
+      padding: 1.25rem;
+      border-radius: 12px;
+      text-align: center;
+      color: #dff7ef;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .stats-panel h2 {
+      margin: 0 0 8px;
+      color: #bff4e8;
+    }
+
+    .stats-panel p {
+      margin: 6px 0;
+      font-weight: 600;
+    }
+
+    #statControls {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .feedback {
+      font-size: 1.04rem;
+      margin-top: 1.1rem;
+      min-height: 1.6rem;
+      color: #d7f7ef;
+      transition: color .16s ease, transform .16s ease;
+    }
+
+    .feedback.warn { color: #ffd37a; }
+    .feedback.bad { color: #ff9a9a; }
+    .feedback.good { color: #9ef3c6; transform: scale(1.02); }
+
+    .previousGuesses {
+      margin-top: 0.65rem;
+      color: #92a6b1;
+      font-size: 1.5rem;
+    }
+
+    .guess-list {
+      margin: 0 8px;
+      color: #aee1e1;
+      font-weight: 500;
+      animation: guessFade 0.5s ease, glowOnce 2s ease infinite;
+    }
+
+    .wrongGuess-list {
+      margin: 0 8px;
+      color: #ff9a9a;
+      font-weight: 500;
+      animation: guessFade 1s ease, glowOnce 2s ease;
+    }
+
+    @keyframes guessFade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes glowOnce {
+      0% { text-shadow: 0 0 8px #5fe788; }
+      100% { text-shadow: none; }
+    }
+
+    .meta {
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    ul li {
+      margin-bottom: 5px;
+      text-align: justify;
+    }
+
+    /* ====== Glow Effects ====== */
+    .game-container.win {
+      box-shadow: 0 0 25px rgba(0,255,150,0.5);
+      transition: 1s box-shadow ease-in-out;
+    }
+
+    .game-container.lose {
+      box-shadow: 0 0 25px rgba(255,100,100,0.4);
+      transition: 1s box-shadow ease-in-out;
+    }
+
+    /* ====== Helpers & Responsiveness ====== */
+    .sr-only {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 420px) {
+      .input-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+      input[type="text"] {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <div id="startScreen">
-        <h1>Welcome to Num Guess!</h1>
-        <button id="startBtn">Start Game</button>
-    </div>
-    <div id="loadingScreen" role="status" aria-live="polite">
-        <div class="loader" aria-hidden="true"></div>
-        <p>Loading Num Guess...</p>
-    </div>
+  <!-- ====== Start Screen ====== -->
+  <div id="startScreen">
+    <h1>Welcome to Num Guess!</h1>
+    <button id="startBtn">Start Game</button>
+  </div>
 
-    
-    <audio id="bgMusic" src="Sounds/mystical-music-54294.mp3"></audio>
-    <audio id="wrong" src="Sounds/classic-game-action-negative-18-224576.mp3"></audio>
-    <audio id="lose" src="Sounds/game-over-417465.mp3"></audio>
-    <audio id="win" src="Sounds/level-up-08-402152.mp3"></audio>
+  <!-- ====== Loading Screen ====== -->
+  <div id="loadingScreen" role="status" aria-live="polite">
+    <div class="loader" aria-hidden="true"></div>
+    <p>Loading Num Guess...</p>
+  </div>
 
-    
-    <main class="game-container" aria-labelledby="gameTitle" style="display:none;">
-        <h1 id="gameTitle">🔢 Num Guess</h1>
-        <p class="lead">Guess the number between <span class="range">1</span> and <span class="range">100</span>.</p>
+  <!-- ====== Audio ====== -->
+  <audio id="bgMusic" src="Sounds/mystical-music-54294.mp3"></audio>
+  <audio id="wrong" src="Sounds/classic-game-action-negative-18-224576.mp3"></audio>
+  <audio id="lose" src="Sounds/game-over-417465.mp3"></audio>
+  <audio id="win" src="Sounds/level-up-08-402152.mp3"></audio>
 
-        <div class="input-group">
-            <label for="guessInput" class="sr-only">Enter your guess</label>
-            <input id="guessInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Enter guess" aria-describedby="hint"/>
-            <button id="guessBtn">Guess</button>
-        </div>
+  <!-- ====== Main Game ====== -->
+  <main class="game-container" aria-labelledby="gameTitle" style="display:none;">
+    <h1 id="gameTitle">🔢 Num Guess</h1>
+    <p class="lead">
+      Guess the number between <span class="range">1</span> and <span class="range">100</span>.
+    </p>
 
-        <div id="hint" class="feedback" aria-live="polite"></div>
-        <div class="attempts" id="attempts">Attempts: 0</div>
-
-        <div class="meta">
-            
-                <button id="statsBtn" class="secondary">Stats</button>
-                <button id="resetBtn" class="secondary">Restart Game</button>
-            
-        </div>
-        
-    </main>
-
-    <!-- Stats Modal -->
-    <div id="statsModal" aria-hidden="true">
-        <div class="stats-panel" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
-            <h2 id="statsTitle">Statistics</h2>
-            <p>Wins: <span id="statWins">0</span></p>
-            <p>Losses: <span id="statLosses">0</span></p>
-            <p>W/L Ratio: <span id="statsWinLose">0.00</span></p>
-            <div id="statControls">
-                <button id="clearStats" class="secondary">Clear</button>
-                <button id="closeStats" class="secondary">Close</button>
-            </div>
-        </div>
+    <div class="input-group">
+      <label for="guessInput" class="sr-only">Enter your guess</label>
+      <input id="guessInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Enter guess" aria-describedby="hint" />
+      <button id="guessBtn">Guess</button>
     </div>
 
-    <script>
-     // --- Game Startup Sequence ---
-const startBtn = document.getElementById('startBtn');
-const startScreen = document.getElementById('startScreen');
-const loading = document.getElementById('loadingScreen');
-const game = document.querySelector('.game-container');
-const bgMusic = document.getElementById('bgMusic');
-const wrongAttempt = document.getElementById('wrong');
-const loseSound = document.getElementById('lose');
-const winSound = document.getElementById('win');
+    <div id="hint" class="feedback" aria-live="polite"></div>
+    <div class="previousGuesses" id="previousGuesses"><span id="guess-list"></span></div>
 
-// --- Statistics (persisted) ---
-const STATS_KEY = 'numguess_stats';
-let stats = { wins: 0, losses: 0, winLose: 0 };
-function loadStats() {
-    try {
+    <div class="meta">
+      <div class="buttons">
+        <button id="helpBtn" class="secondary">How to Play</button>
+        <button id="statsBtn" class="secondary">Stats</button>
+        <button id="resetBtn" class="secondary">Restart Game</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====== Stats Modal ====== -->
+  <div id="statsModal" aria-hidden="true">
+    <div class="stats-panel" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+      <h2 id="statsTitle">Statistics</h2>
+      <p>Wins: <span id="statWins">0</span></p>
+      <p>Losses: <span id="statLosses">0</span></p>
+      <p>W/L Ratio: <span id="statsWinLose">0.00</span></p>
+      <div id="statControls">
+        <button id="clearStats" class="secondary">Clear</button>
+        <button id="closeStats" class="secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Help Modal ====== -->
+  <div id="helpModal" aria-hidden="true">
+    <div class="stats-panel" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <h2 id="helpTitle">How to Play</h2>
+
+      <div style="text-align:left; margin:15px 0;">
+        <p style="margin-bottom:12px;">🎯 <strong>Your Goal:</strong> Guess the secret number hidden between <strong>1</strong> and <strong>100</strong>.</p>
+        <p style="margin-bottom:12px;">🧩 You have <strong>3 attempts</strong> to find the correct number — so choose wisely!</p>
+        <p style="margin-bottom:12px;">🔍 After each guess, you’ll receive a hint:</p>
+        <ul style="list-style:none; padding-left:15px; margin-bottom:12px;">
+          <li>🔥 <strong>Very close</strong> — within <strong>5</strong> numbers</li>
+          <li>♨️ <strong>Warm</strong> — within <strong>10</strong> numbers</li>
+          <li>❄️ <strong>Cold</strong> — within <strong>20</strong> numbers</li>
+          <li>🌌 <strong>Far</strong> — Not close at all, like more than <strong>20</strong> numbers away</li>
+        </ul>
+        <p style="margin-bottom:12px;">⬆️ You’ll also be told whether to guess <strong>higher</strong> or <strong>lower</strong>.</p>
+        <p>📊 Track your <strong>Stats</strong> to see wins, losses, and your W/L ratio — or hit <strong>Restart Game</strong> anytime to play again!</p>
+      </div>
+
+      <div id="helpControls">
+        <button id="closeHelp" class="secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== JavaScript ====== -->
+  <script>
+    // --- Game Startup Sequence ---
+    const startBtn = document.getElementById('startBtn');
+    const startScreen = document.getElementById('startScreen');
+    const loading = document.getElementById('loadingScreen');
+    const game = document.querySelector('.game-container');
+    const bgMusic = document.getElementById('bgMusic');
+    const wrongAttempt = document.getElementById('wrong');
+    const loseSound = document.getElementById('lose');
+    const winSound = document.getElementById('win');
+
+    // --- Statistics (persisted) ---
+    const STATS_KEY = 'numguess_stats';
+    let stats = { wins: 0, losses: 0, winLose: 0 };
+
+    function loadStats() {
+      try {
         const raw = localStorage.getItem(STATS_KEY);
         if (raw) {
-            const parsed = JSON.parse(raw);
-            if (typeof parsed.wins === 'number' && typeof parsed.losses === 'number') stats = parsed;
+          const parsed = JSON.parse(raw);
+          if (typeof parsed.wins === 'number' && typeof parsed.losses === 'number') stats = parsed;
         }
-    } catch (e) { /* ignore */ }
-}
-function saveStats() { updateWinLoseRatio(); localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }
-function openStats() {
-    document.getElementById('statWins').textContent = stats.wins;
-    document.getElementById('statLosses').textContent = stats.losses;
-    document.getElementById('statsWinLose').textContent = stats.winLose;
-    const modal = document.getElementById('statsModal');
+      } catch (e) {}
+    }
+
+    function saveStats() {
+      updateWinLoseRatio();
+      localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+    }
+
+    function openStats() {
+      document.getElementById('statWins').textContent = stats.wins;
+      document.getElementById('statLosses').textContent = stats.losses;
+      document.getElementById('statsWinLose').textContent = stats.winLose;
+      const modal = document.getElementById('statsModal');
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeStats() {
+      const modal = document.getElementById('statsModal');
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    function updateWinLoseRatio() {
+      if (stats.losses === 0 && stats.wins > 0) {
+        stats.winLose = "🔥 Perfect Record";
+      } else if (stats.losses > 0) {
+        stats.winLose = (stats.wins / stats.losses).toFixed(2);
+      } else {
+        stats.winLose = 0.00;
+      }
+    }
+
+    loadStats();
+    updateWinLoseRatio();
+
+    const statsBtn = document.getElementById('statsBtn');
+    if (statsBtn) statsBtn.addEventListener('click', openStats);
+
+    const closeStatsBtn = document.getElementById('closeStats');
+    if (closeStatsBtn) closeStatsBtn.addEventListener('click', () => {
+    stats = { wins: 0, losses: 0, winLose: `${0.00}` };
+    saveStats();
+    openStats();
+    });
+
+// ==========================
+// 🧭 Help Modal
+// ==========================
+function openHelp() {
+    const modal = document.getElementById('helpModal');
     modal.style.display = 'flex';
     modal.setAttribute('aria-hidden', 'false');
 }
-function closeStats() {
-    const modal = document.getElementById('statsModal');
+
+function closeHelp() {
+    const modal = document.getElementById('helpModal');
     modal.style.display = 'none';
     modal.setAttribute('aria-hidden', 'true');
 }
-//Win Lose ratio logic
-function updateWinLoseRatio() {
-    if (stats.losses === 0 && stats.wins > 0) {
-        stats.winLose = "🔥 Perfect Record";
-    } else if (stats.losses > 0) {
-        stats.winLose = (stats.wins / stats.losses).toFixed(2);
-    } else {
-        stats.winLose = 0.00;
-    }
-}
-loadStats();
-updateWinLoseRatio();
 
-// wire stats buttons (exist when script runs at end of body)
-const statsBtn = document.getElementById('statsBtn');
-if (statsBtn) statsBtn.addEventListener('click', openStats);
-const closeStatsBtn = document.getElementById('closeStats');
-if (closeStatsBtn) closeStatsBtn.addEventListener('click', closeStats);
-const clearStatsBtn = document.getElementById('clearStats');
-if (clearStatsBtn) clearStatsBtn.addEventListener('click', () => {
-    stats = { wins: 0, losses: 0, winLose: `${0.00}`}; saveStats(); openStats();
-});
+const helpBtn = document.getElementById('helpBtn');
+if (helpBtn) helpBtn.addEventListener('click', openHelp);
 
+const closeHelpBtn = document.getElementById('closeHelp');
+if (closeHelpBtn) closeHelpBtn.addEventListener('click', closeHelp);
 
-
+// ==========================
+// 🚀 Start Game Button
+// ==========================
 startBtn.addEventListener('click', () => {
     startScreen.style.display = 'none';
     loading.style.display = 'flex';
     bgMusic.volume = 0.2;
     bgMusic.loop = true;
-    bgMusic.play().catch(err => console.log('Autoplay blocked until interaction:', err));
+
+    bgMusic.play().catch(err =>
+        console.log('Autoplay blocked until interaction:', err)
+    );
 
     setTimeout(() => {
         loading.style.opacity = '0';
@@ -333,133 +524,172 @@ startBtn.addEventListener('click', () => {
     }, 1500);
 });
 
+// ==========================
+// 🎯 Main Game Logic
+// ==========================
+(function() {
+    const max = 100, min = 1;
+    let secret = rand(min, max);
+    let attempts = 0;
+    let previousGuesses = [];
 
-        // Game logic
-        (function() {
-            const max = 100, min = 1;
-            let secret = rand(min, max);
-            let attempts = 0;
-            const input = document.getElementById('guessInput');
-            const guessBtn = document.getElementById('guessBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const feedback = document.getElementById('hint');
-            const attemptsEl = document.getElementById('attempts');
+    const input = document.getElementById('guessInput');
+    const guessBtn = document.getElementById('guessBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const feedback = document.getElementById('hint');
+    const guesses = document.getElementById('guess-list');
 
-            function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    // --------------------------
+    // Utility Functions
+    // --------------------------
+    function rand(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
-            function updateAttempts(){
-                attemptsEl.textContent = 'Attempts: ' + attempts;
+    function sanitizeVal(v) {
+        if (!v) return NaN;
+        v = v.trim();
+        if (!/^\d+$/.test(v)) return NaN;
+        return Number(v);
+    }
+
+    function setFeedback(msg, type) {
+        feedback.textContent = msg;
+        feedback.className = 'feedback' + (type ? ' ' + type : '');
+    }
+
+    // --------------------------
+    // Update Previous Guesses (with fade-in animation)
+    // --------------------------
+    function updatePreviousGuesses() {
+        guesses.innerHTML = previousGuesses.map(g => {
+            if (g === secret) {
+                return `<span class="guess-list">${g}</span>`;
+            } else {
+                return `<span class="wrongGuess-list">${g}</span>`;
             }
+        }).join('  ');
+    }
 
-            function sanitizeVal(v){
-                // allow leading/trailing spaces, disallow +/-, decimals
-                if (!v) return NaN;
-                v = v.trim();
-                // only digits
-                if (!/^\d+$/.test(v)) return NaN;
-                return Number(v);
-            }
+    // --------------------------
+    // Handle Guess Logic
+    // --------------------------
+    function handleGuess() {
+        const raw = input.value;
+        const val = sanitizeVal(raw);
 
-            function setFeedback(msg, type){
-                feedback.textContent = msg;
-                feedback.className = 'feedback' + (type ? ' ' + type : '');
-            }
+        if (isNaN(val)) {
+            setFeedback(`Please enter a whole number between ${min} and ${max}.`, 'warn');
+            return;
+        }
 
-            function handleGuess(){
-                const raw = input.value;
-                const val = sanitizeVal(raw);
+        if (val < min || val > max) {
+            setFeedback(`Number must be between ${min} and ${max}.`, 'warn');
+            return;
+        }
 
-                if (isNaN(val)){
-                    setFeedback('Please enter a whole number between ' + MIN + ' and ' + MAX + '.', 'warn');
-                    return;
-                }
-                if (val < min || val > max){
-                    setFeedback(`Number must be between ${min} and ${max}.`, 'warn');
-                    return;
-                }
-                
-                attempts++;
-                updateAttempts();
-                if (attempts === 3 && val !== secret) {
-                    //Game Over Logic
-                    input.disabled = true;  
-                    guessBtn.disabled = true;
-                    setFeedback(`😥 Game Over, You Lose. Correct Number was ${secret}.`, 'bad');
-                    document.querySelector(".game-container").classList.add('lose')
-                    // add shake effect
-                    feedback.animate([{ transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }], { duration:200, easing:'ease-out' });
-                    //lose sound
-                    loseSound.currentTime = 0;
-                    loseSound.play();
-                    bgMusic.pause();
-                    // record loss
-                    try { stats.losses = (stats.losses || 0) + 1; saveStats(); } catch(e) {}
-                    return;
-                    }
-                    // Correct Guess Logic
-                if (val === secret){
-                    setFeedback(`🎉 Correct! The number was ${secret}.`, 'good');
-                    document.querySelector(".game-container").classList.add('win')
-                    winSound.currentTime = 0;
-                        winSound.play();
-                        winSound.volume = 0.3;
-                        bgMusic.pause();
-                    // record win
-                    try { stats.wins = (stats.wins || 0) + 1; saveStats(); } catch(e) {}
-                
-                    
-                    // disable inputs
-                    input.disabled = true;
-                    guessBtn.disabled = true;
-                } else {
-                    const diff = Math.abs(val - secret);
-                    let hint = (val < secret) ? 'Try higher ⬆' : 'Try lower ↓';
-                    // add relative hint
-                    if (diff <= 5) hint = '🔥 Very close! ' + hint;
-                    else if (diff <= 10) hint = 'Warm. ' + hint;
-                    else if (diff <= 20) hint = 'Cold. ' + hint;
-                    else hint = 'Far. ' + hint;
-                    setFeedback(hint, 'bad');
-                    // small shake for bad guess
-                    feedback.animate([{ transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }], { duration:200, easing:'ease-out' });
-                    wrongAttempt.currentTime = 0;
-                    wrongAttempt.play();
-                }
-                input.value = '';
-                input.focus();
-            }
+        previousGuesses.push(val);
+        attempts++;
+        updatePreviousGuesses();
 
-            
-            guessBtn.addEventListener('click',  () => {
-                handleGuess();
-            });
+        // ❌ Game Over
+        if (attempts === 3 && val !== secret) {
+            input.disabled = true;
+            guessBtn.disabled = true;
+            setFeedback(`😥 Game Over, You Lose. Correct number was ${secret}.`, 'bad');
+            document.querySelector('.game-container').classList.add('lose');
 
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                
-                    handleGuess();
-                }
-                // prevent non-digit keys except control keys
-                if (e.key.length === 1 && !/[\d]/.test(e.key)) {
-                    e.preventDefault();
-                }
-            });
+            feedback.animate(
+                [{ transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }],
+                { duration: 200, easing: 'ease-out' }
+            );
 
-            resetBtn.addEventListener('click', () => {
-                secret = rand(min, max);
-                attempts = 0;
-                updateAttempts();
-                setFeedback('Game reset. Good luck!', '');
-                input.disabled = false;
-                guessBtn.disabled = false;
-                input.value = '';
-                input.focus();
-                document.querySelector('.game-container').classList.remove('win', 'lose');
-                bgMusic.play().catch(err => console.log('Autoplay blocked until interaction:', err));
-            });
+            loseSound.currentTime = 0;
+            loseSound.play();
+            bgMusic.pause();
 
-        })();
-    </script>
+            try { stats.losses = (stats.losses || 0) + 1; saveStats(); } catch(e) {}
+            return;
+        }
+
+        // 🎉 Correct Guess
+        if (val === secret) {
+            setFeedback(`🎉 Correct! The number was ${secret}.`, 'good');
+            document.querySelector('.game-container').classList.add('win');
+
+            winSound.currentTime = 0;
+            winSound.play();
+            winSound.volume = 0.3;
+            bgMusic.pause();
+
+            try { stats.wins = (stats.wins || 0) + 1; saveStats(); } catch(e) {}
+
+            input.disabled = true;
+            guessBtn.disabled = true;
+            return;
+        }
+
+        // 🧊 Incorrect Guess — Give Hint
+        const diff = Math.abs(val - secret);
+        let hint = (val < secret) ? 'Try higher ⬆️' : 'Try lower ⬇️';
+
+        if (diff <= 5) hint = '🔥 Very close! ' + hint;
+        else if (diff <= 10) hint = '♨️ Warm. ' + hint;
+        else if (diff <= 20) hint = '❄️ Cold. ' + hint;
+        else hint = '🌌 Far. ' + hint;
+
+        setFeedback(hint, 'bad');
+
+        feedback.animate(
+            [{ transform:'translateX(-6px)' }, { transform:'translateX(6px)' }, { transform:'translateX(0)' }],
+            { duration: 200, easing: 'ease-out' }
+        );
+
+        wrongAttempt.currentTime = 0;
+        wrongAttempt.play();
+
+        input.value = '';
+        input.focus();
+    }
+
+    // --------------------------
+    // Event Listeners
+    // --------------------------
+    guessBtn.addEventListener('click', handleGuess);
+
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleGuess();
+        }
+
+        // Prevent non-digit keys
+        if (e.key.length === 1 && !/[\d]/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        secret = rand(min, max);
+        attempts = 0;
+        previousGuesses.length = 0;
+
+        setFeedback('Game reset. Good luck!', '');
+        updatePreviousGuesses();
+
+        input.disabled = false;
+        guessBtn.disabled = false;
+        input.value = '';
+        input.focus();
+
+        document.querySelector('.game-container').classList.remove('win', 'lose');
+
+        bgMusic.play().catch(err =>
+            console.log('Autoplay blocked until interaction:', err)
+        );
+    });
+
+})();
+</script>
 </body>
 </html>
