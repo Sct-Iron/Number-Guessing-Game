@@ -1,0 +1,322 @@
+ /* ====== Base Reset ====== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #071425 0%, #0f2027 40%, #203a43 100%);
+      color: #e6f7f2;
+      padding: 2rem;  
+    }
+
+    /* ====== Start Screen ====== */
+    #startScreen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
+      color: #aee1e1;
+      z-index: 10000;
+      animation: fadeIn1 .6s ease;
+    }
+
+    @keyframes fadeIn1 {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    #startBtn {
+      padding: 0.56rem 0.85rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      color: #072022;
+      background: linear-gradient(135deg, #00c9a7, #6df0b0);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+      margin: 15px;
+    }
+
+    #startBtn:active {
+      transform: translateY(1px);
+    }
+
+    /* ====== Loading Screen ====== */
+    #loadingScreen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(8,18,24,0.95), rgba(12,25,30,0.92));
+      color: #aee1e1;
+      z-index: 9999;
+      transition: opacity .6s ease, visibility .6s ease;
+    }
+
+    .loader {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 6px solid rgba(255,255,255,0.08);
+      border-top-color: #00c9a7;
+      animation: spin 1s linear infinite;
+      margin-bottom: 14px;
+    }
+
+    #loadingScreen p {
+      font-size: 1.05rem;
+      letter-spacing: 0.2px;
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ====== Game Card ====== */
+    .game-container {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 1.6rem;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      animation: fadeIn .6s ease, float 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+
+    h1 {
+      font-size: 1.45rem;
+      margin-bottom: 6px;
+      color: #bff4e8;
+    }
+
+    p.lead {
+      color: #cde8e2;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .range {
+      font-weight: 600;
+      color: #e6fff8;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    input[type="text"] {
+      width: 140px;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,0.04);
+      color: #eafff6;
+      text-align: center;
+      font-size: 1rem;
+      transition: box-shadow .18s ease, transform .12s ease;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 8px rgba(0,201,167,0.18);
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.06);
+    }
+
+    button {
+      padding: 0.56rem 0.85rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      color: #072022;
+      background: linear-gradient(135deg, #00c9a7, #6df0b0);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.secondary {
+      background: linear-gradient(180deg, #24303b, #2e3b46);
+      color: #cfeee8;
+      font-weight: 700;
+    }
+
+    button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ====== Stats & Help Modals ====== */
+    #statsBtn, #helpBtn {
+      margin-right: 8px;
+    }
+
+    #statsModal, #helpModal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 10, 18, 0.8);
+      backdrop-filter: blur(6px);
+      z-index: 10002;
+      padding: 1rem;
+    }
+
+    .stats-panel {
+      width: 100%;
+      max-width: 360px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      backdrop-filter: blur(10px);
+      border: none;
+      padding: 1.25rem;
+      border-radius: 12px;
+      text-align: center;
+      color: #dff7ef;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      
+    }
+
+    .stats-panel h2 {
+      margin: 0 0 8px;
+      color: #bff4e8;
+    }
+
+    .stats-panel p {
+      margin: 6px 0;
+      font-weight: 600;
+    }
+
+    #statControls {
+      margin-top: 12px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .feedback {
+      font-size: 1.04rem;
+      margin-top: 1.1rem;
+      min-height: 1.6rem;
+      color: #d7f7ef;
+      transition: color .16s ease, transform .16s ease;
+    }
+
+    .feedback.warn { color: #ffd37a; }
+    .feedback.bad { color: #ff9a9a; }
+    .feedback.good { color: #9ef3c6; transform: scale(1.02); }
+
+    .previousGuesses {
+      margin-top: 0.65rem;
+      color: #92a6b1;
+      font-size: 1.5rem;
+    }
+
+    .guess-list {
+      margin: 0 8px;
+      color: #aee1e1;
+      font-weight: 500;
+      animation: guessFade 0.5s ease, glowOnce 2s ease infinite;
+    }
+
+    .wrongGuess-list {
+      margin: 0 8px;
+      color: #ff9a9a;
+      font-weight: 500;
+      animation: guessFade 1s ease, glowOnce 2s ease;
+    }
+
+    @keyframes guessFade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    @keyframes glowOnce {
+      0% { text-shadow: 0 0 8px #5fe788; }
+      100% { text-shadow: none; }
+    }
+
+    .meta {
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    ul li {
+      margin-bottom: 5px;
+      text-align: justify;
+    }
+
+    /* ====== Glow Effects ====== */
+    .game-container.win {
+      box-shadow: 0 0 25px rgba(0,255,150,0.5);
+      transition: 1s box-shadow ease-in-out;
+    }
+
+    .game-container.lose {
+      box-shadow: 0 0 25px rgba(255,100,100,0.4);
+      transition: 1s box-shadow ease-in-out;
+    }
+
+    /* ====== Helpers & Responsiveness ====== */
+    .sr-only {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 420px) {
+      .input-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+      input[type="text"] {
+        width: 100%;
+      }
+    }
